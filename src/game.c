@@ -27,6 +27,9 @@ bool game_new(Game **game)
 	{
 		if (flake_new(&g->flakes, g->renderer, g->white_image, true)) return true;
 	}
+
+	if (score_new(&g->score, g->renderer)) return true;
+	if (fps_new(&g->fps)) return true;
 	g->playing = true;
 	
 	return false;
@@ -38,6 +41,8 @@ void game_free(Game **game)
 	if (*game)
 	{
 		Game *g = *game;
+		fps_free(&g->fps);
+		score_free(&g->score);
 		flakes_free(&g->flakes);
 		player_free(&g->player);
 
@@ -61,7 +66,7 @@ void game_free(Game **game)
 		g->window = NULL;
 
 		Mix_CloseAudio();
-		
+		TTF_Quit();
 		Mix_Quit();
 		IMG_Quit();
 		SDL_Quit();
@@ -75,6 +80,7 @@ void game_free(Game **game)
 bool game_reset(Game *g)
 {
 	flakes_reset(g->flakes);
+	if (score_reset(g->score)) return true;
 	player_reset(g->player);
 	g->playing = true;
 	return false;
@@ -84,6 +90,7 @@ bool handle_collision(Game *g, Flake *f)
 	if (f->is_white){
 		Mix_PlayChannel(-1, g->collect_sound, 0);
 		flake_reset(f, false);
+		if (score_increment(g->score)) return true;
 	} else
 	{
 		Mix_PlayChannel(-1, g->hit_sound, 0);
@@ -138,6 +145,10 @@ bool game_run(Game *g)
 					{
 						if (game_reset(g)) return true;
 					}
+					break;
+				case SDL_SCANCODE_F:
+					fps_toggle_display(g->fps);
+					break;
 				default:
 					break;
 				}
@@ -156,9 +167,10 @@ bool game_run(Game *g)
 		SDL_RenderCopy(g->renderer, g->background_image, NULL, &g->background_rect);
 		player_draw(g->player);
 		flakes_draw(g->flakes);
+		score_draw(g->score);
 		SDL_RenderPresent(g->renderer);
 
-		SDL_Delay(16);
+		fps_update(g->fps);
 	}
 	return false;
 }

@@ -4,6 +4,8 @@
 #include "player.h"
 #include "flakes.h"
 #include <time.h>
+#include "score.h"
+#include "fps.h"
 
 typedef struct
 {
@@ -19,6 +21,8 @@ typedef struct
 	Mix_Chunk *hit_sound;
 	Player *player;
 	Flake *flakes;
+	Score *score;
+	Fps *fps;
 	bool playing;
 } Game;
 bool game_new(Game **g);

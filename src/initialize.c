@@ -20,6 +20,12 @@ bool game_initialize(Game *g)
 		return true;
 	}
 
+	if (TTF_Init())
+	{
+		fprintf(stderr, "Error initializing ttf: %s\n", TTF_GetError());
+		return true;
+	}
+
 	if (Mix_OpenAudio(MIX_DEFAULT_FREQUENCY, MIX_DEFAULT_FORMAT, MIX_DEFAULT_CHANNELS, 1024))
 	{
 		fprintf(stderr, "Error opening audio: %s\n", Mix_GetError());
